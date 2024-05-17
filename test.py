@@ -34,20 +34,6 @@ def purity_calculator(H_ro):
         p = p_search(H_ro)
         return 2*(p**2) - 2*p +1, p
 
-#def purity_calculator(H_ro):
-#    if H_ro == 0:
-#        return 1
-#    elif H_ro == 0.3:
-#        p = 0.053239
-#        #p = 0.946761
-#    elif H_ro == 0.6:
-#        #p = 0.853898
-#        p = 0.146102
-#    elif H_ro == 0.9:
-#        p = 0.316019
-#        # p = 0.683981
-#    return 2*(p**2) - 2*p +1
-
 def p_calculator(H_ro):
     if H_ro == 0:
         return 0.999
@@ -97,8 +83,6 @@ def lower_bound_eq13(H_ro, c):
     return binary_entropy
 
 def entropy_calculator(x, p):
-    #p = p_calculator(H_ro)
-    #p = p_search(H_ro)
     value = x*p + (1-x)*(1-p)
     entropy = - value * math.log2(value) - (1-value) * math.log2(1-value)
     entropy_p = -p * math.log2(p) - (1-p) * math.log2(1-p)
@@ -131,9 +115,14 @@ def l1_entropy(H_ro, P, c):
     return l1
 
 
+
+fig_1, axs_1 = plt.subplots(2, 2, figsize=(10, 8))  # 2 rows, 2 columns
+
 c = [i/1000 for i in range(500, 1000)]
 h_ro = [0, 0.3, 0.6, 0.9]
+ip = 0
 for H_ro in h_ro:
+    
     P, p = purity_calculator(H_ro)
     lb4 = lower_bound_eq4(H_ro, c)
     lb12 = lower_bound_eq12(H_ro, c)
@@ -141,17 +130,20 @@ for H_ro in h_ro:
     lb14 = lower_bound_eq14(P, H_ro, c)
     no = numerical_optimum(c, p)
 
-    plt.plot(c, lb4, label = "Eq. (4)")
-    plt.plot(c, lb12, label = "Eq. (12)")
-    plt.plot(c, lb13, label = "Eq. (13)")
-    plt.plot(c, lb14, label = "Eq. (14)")
-    plt.plot(c, no, label = "Numerical optimum")
+    axs_1[ip%2,ip//2]
+    axs_1[ip%2,ip//2].plot(c, lb4, label = "Eq. (4)")
+    axs_1[ip%2,ip//2].plot(c, lb12, label = "Eq. (12)")
+    axs_1[ip%2,ip//2].plot(c, lb13, label = "Eq. (13)")
+    axs_1[ip%2,ip//2].plot(c, lb14, label = "Eq. (14)")
+    axs_1[ip%2,ip//2].plot(c, no, label = "Numerical optimum")
 
-    plt.xlabel('c')
-    plt.ylabel('Lower bound')
-    plt.title('H(ro)=' + str(H_ro))
-    plt.legend()
-    plt.show()
+    axs_1[ip%2,ip//2].set_xlabel('c')
+    axs_1[ip%2,ip//2].set_ylabel('Lower bound')
+    axs_1[ip%2,ip//2].set_title('H(ro)=' + str(H_ro))
+    axs_1[ip%2,ip//2].legend()
+    ip = ip + 1
+
+fig_1.savefig('plots/H(rho)'  + '.png', bbox_inches='tight')
 
 H_ro = 0.6
 P, p = purity_calculator(H_ro)
@@ -168,11 +160,20 @@ difflb12_13 = [x - y for x, y in zip(lb12, lb13)]
 difflb12_14 = [x - y for x, y in zip(lb12, lb14)]
 difflb13_14 = [x - y for x, y in zip(lb13, lb14)]
 
+list_vals_plot = [lb4, lb12, lb13, lb14, difflb4_12, difflb4_13, difflb4_14, difflb12_13, difflb12_14, difflb13_14]
+
+fig_2, axs_2 = plt.subplots(2, 5, figsize=(8*5, 6*2))
+
 for i, data in enumerate([lb4, lb12, lb13, lb14, difflb4_12, difflb4_13, difflb4_14, difflb12_13, difflb12_14, difflb13_14]):
     matrix = np.array(data).reshape(num_rows, num_cols)
-    plt.figure(figsize=(8, 6))
-    plt.imshow(matrix, cmap='gray', interpolation='nearest')
-    plt.colorbar()
-    plt.title(f"Heatmap {i+1}")
-    plt.show()
+    im = axs_2[i%2,i%5].imshow(matrix, cmap='gray', interpolation='nearest')
+    fig_2.colorbar(im, ax=axs_2[i%2,i%5])
+    axs_2[i%2,i%5].set_title(f"Heatmap {i+1}")
+
+fig_2.savefig('plots/Heatmaps'  + '.png')
+
+
+print("***************************************************")
+print("*         PLOTS ARE SAVED IN /plots FOLDER         *")
+print("***************************************************")
 
