@@ -13,4 +13,4 @@ docker-compose build
 docker-compose up
 ```
 After this command python script should run automatically.
-Plots are available in int /plot folder.
+Plots are available in the /plot folder.
