@@ -114,10 +114,15 @@ def l1_entropy(H_ro, P, c):
         l1.append(value)
     return l1
 
-
+def mod(data):
+    if data >= 0:
+        return data
+    return -1*data
 
 fig_1, axs_1 = plt.subplots(2, 2, figsize=(10, 8))  # 2 rows, 2 columns
+axs_1 = axs_1.flatten()
 
+#c = [i/1000 for i in range(500, 1000)]
 c = [i/1000 for i in range(500, 1000)]
 h_ro = [0, 0.3, 0.6, 0.9]
 ip = 0
@@ -130,45 +135,85 @@ for H_ro in h_ro:
     lb14 = lower_bound_eq14(P, H_ro, c)
     no = numerical_optimum(c, p)
 
-    axs_1[ip%2,ip//2]
-    axs_1[ip%2,ip//2].plot(c, lb4, label = "Eq. (4)")
-    axs_1[ip%2,ip//2].plot(c, lb12, label = "Eq. (12)")
-    axs_1[ip%2,ip//2].plot(c, lb13, label = "Eq. (13)")
-    axs_1[ip%2,ip//2].plot(c, lb14, label = "Eq. (14)")
-    axs_1[ip%2,ip//2].plot(c, no, label = "Numerical optimum")
+    axs_1[ip]
+    axs_1[ip].plot(c, lb4, label = "Eq. (4)")
+    axs_1[ip].plot(c, lb12, label = "Eq. (12)")
+    axs_1[ip].plot(c, lb13, label = "Eq. (13)")
+    axs_1[ip].plot(c, lb14, label = "Eq. (14)")
+    axs_1[ip].plot(c, no, label = "Numerical optimum")
 
-    axs_1[ip%2,ip//2].set_xlabel('c')
-    axs_1[ip%2,ip//2].set_ylabel('Lower bound')
-    axs_1[ip%2,ip//2].set_title('H(ro)=' + str(H_ro))
-    axs_1[ip%2,ip//2].legend()
+    axs_1[ip].set_xlabel('c')
+    axs_1[ip].set_ylabel('Lower bound')
+    axs_1[ip].set_title('H(ro)=' + str(H_ro))
+    axs_1[ip].legend()
     ip = ip + 1
 
 fig_1.savefig('plots/H(rho)'  + '.png', bbox_inches='tight')
 
 H_ro = 0.6
 P, p = purity_calculator(H_ro)
-num_rows = 25
-num_cols = 20
+num_rows = 500
+num_cols = 350
 lb4 = lower_bound_eq4(H_ro, c)
 lb12 = lower_bound_eq12(H_ro, c)
 lb13 = lower_bound_eq13(H_ro, c)
 lb14 = lower_bound_eq14(P, H_ro, c)
-difflb4_12 = [x - y for x, y in zip(lb4, lb12)]
-difflb4_13 = [x - y for x, y in zip(lb4, lb13)]
-difflb4_14 = [x - y for x, y in zip(lb4, lb14)]
-difflb12_13 = [x - y for x, y in zip(lb12, lb13)]
-difflb12_14 = [x - y for x, y in zip(lb12, lb14)]
-difflb13_14 = [x - y for x, y in zip(lb13, lb14)]
+difflb4_12 = [mod(x - y) for x, y in zip(lb4, lb12)]
+difflb4_13 = [mod(x - y) for x, y in zip(lb4, lb13)]
+difflb4_14 = [mod(x - y) for x, y in zip(lb4, lb14)]
+difflb12_13 = [mod(x - y) for x, y in zip(lb12, lb13)]
+difflb12_14 = [mod(x - y) for x, y in zip(lb12, lb14)]
+difflb13_14 = [mod(x - y) for x, y in zip(lb13, lb14)]
 
-list_vals_plot = [lb4, lb12, lb13, lb14, difflb4_12, difflb4_13, difflb4_14, difflb12_13, difflb12_14, difflb13_14]
+list_vals_plot = [(lb4,"eq4"), (lb12,"eq12"), (lb13,"eq13"), (lb14,"eq14"), (difflb4_12,"diff eq4 - eq12"), (difflb4_13,"diff eq4 - eq13"), (difflb4_14,"diff eq4 - eq14"), (difflb12_13,"diff eq12 -eq13"), (difflb12_14,"diff eq12 - eq14"), (difflb13_14,"diff eq13 -eq14")]
+
+
+# For the equation heatmaps
+first_four_data_arrays = list_vals_plot[:4]
+all_values_first_four = [value for array, _ in first_four_data_arrays for value in array]
+
+overall_min_first_four = min(all_values_first_four)
+overall_max_first_four = max(all_values_first_four)
+
+
+# For the diff heatmaps
+last_six_data_arrays = list_vals_plot[-6:]
+all_values_last_six = [value for array, _ in last_six_data_arrays for value in array]
+
+overall_min_last_six = min(all_values_last_six)
+overall_max_last_six = max(all_values_last_six)
+
+
 
 fig_2, axs_2 = plt.subplots(2, 5, figsize=(8*5, 6*2))
 
-for i, data in enumerate([lb4, lb12, lb13, lb14, difflb4_12, difflb4_13, difflb4_14, difflb12_13, difflb12_14, difflb13_14]):
-    matrix = np.array(data).reshape(num_rows, num_cols)
-    im = axs_2[i%2,i%5].imshow(matrix, cmap='gray', interpolation='nearest')
-    fig_2.colorbar(im, ax=axs_2[i%2,i%5])
-    axs_2[i%2,i%5].set_title(f"Heatmap {i+1}")
+axs_2 = axs_2.flatten()
+
+for i, (data,name) in enumerate(list_vals_plot):
+    
+    res = [ele for ele in data for i in range(num_cols)]
+    matrix = np.array(res).reshape(num_rows, num_cols)
+    if i >= 5 :
+        im = axs_2[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_last_six, vmax=overall_max_last_six)
+    else:
+        im = axs_2[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_first_four, vmax=overall_max_first_four)
+    fig_2.colorbar(im, ax=axs_2[i])
+    axs_2[i].set_ylabel('c')
+    axs_2[i].set_title(f"Heatmap {name}")
+
+    axs_2[i].set_xticks([])
+
+    # Set the desired number of y-ticks
+    y_ticks = np.linspace(0, num_rows - 1, num=5)
+    
+    # Normalize the y-tick labels to be between 0 and 1
+    y_ticks_normalized = (y_ticks - y_ticks.min()) / (y_ticks.max() - y_ticks.min())
+    
+    # Set the ticks and the normalized labels
+    axs_2[i].set_yticks(y_ticks)
+    axs_2[i].set_yticklabels([f'{0.5 + yt/2:.2f}' for yt in y_ticks_normalized])
+
+fig_2.suptitle('Heatmaps for eq4, eq12, eq13, eq14 and the difference between eachother, with H(rho) = 0.6 ', fontsize=16)
 
 fig_2.savefig('plots/Heatmaps'  + '.png')
 
