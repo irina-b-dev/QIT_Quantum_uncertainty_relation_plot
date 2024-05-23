@@ -158,6 +158,7 @@ lb4 = lower_bound_eq4(H_ro, c)
 lb12 = lower_bound_eq12(H_ro, c)
 lb13 = lower_bound_eq13(H_ro, c)
 lb14 = lower_bound_eq14(P, H_ro, c)
+no = numerical_optimum(c, p)
 difflb4_12 = [mod(x - y) for x, y in zip(lb4, lb12)]
 difflb4_13 = [mod(x - y) for x, y in zip(lb4, lb13)]
 difflb4_14 = [mod(x - y) for x, y in zip(lb4, lb14)]
@@ -165,8 +166,13 @@ difflb12_13 = [mod(x - y) for x, y in zip(lb12, lb13)]
 difflb12_14 = [mod(x - y) for x, y in zip(lb12, lb14)]
 difflb13_14 = [mod(x - y) for x, y in zip(lb13, lb14)]
 
-list_vals_plot = [(lb4,"eq4"), (lb12,"eq12"), (lb13,"eq13"), (lb14,"eq14"), (difflb4_12,"diff eq4 - eq12"), (difflb4_13,"diff eq4 - eq13"), (difflb4_14,"diff eq4 - eq14"), (difflb12_13,"diff eq12 -eq13"), (difflb12_14,"diff eq12 - eq14"), (difflb13_14,"diff eq13 -eq14")]
+difflbno_4 = [mod(x - y) for x, y in zip(no, lb4)]
+difflbno_12 = [mod(x - y) for x, y in zip(no, lb12)]
+difflbno_13 = [mod(x - y) for x, y in zip(no, lb13)]
+difflbno_14 = [mod(x - y) for x, y in zip(no, lb14)]
 
+list_vals_plot = [(lb4,"eq4"), (lb12,"eq12"), (lb13,"eq13"), (lb14,"eq14"), (difflb4_12,"diff eq4 - eq12"), (difflb4_13,"diff eq4 - eq13"), (difflb4_14,"diff eq4 - eq14"), (difflb12_13,"diff eq12 -eq13"), (difflb12_14,"diff eq12 - eq14"), (difflb13_14,"diff eq13 -eq14")]
+list_no_plot = [(no,"Numerical optimum"), (difflbno_4,"diff optimum - eq4"), (difflbno_12,"diff optimum - 12"), (difflbno_13,"diff optimum - eq13"), (difflbno_14,"diff optimum - eq14")]
 
 # For the equation heatmaps
 first_four_data_arrays = list_vals_plot[:4]
@@ -182,6 +188,15 @@ all_values_last_six = [value for array, _ in last_six_data_arrays for value in a
 
 overall_min_last_six = min(all_values_last_six)
 overall_max_last_six = max(all_values_last_six)
+
+
+# For the diff heatmaps
+
+all_values_no_plots = [value for array, _ in list_no_plot for value in array]
+
+overall_min_no_plots = min(all_values_no_plots)
+overall_max_no_plots = max(all_values_no_plots)
+
 
 
 
@@ -216,6 +231,41 @@ for i, (data,name) in enumerate(list_vals_plot):
 fig_2.suptitle('Heatmaps for eq4, eq12, eq13, eq14 and the difference between eachother, with H(rho) = 0.6 ', fontsize=16)
 
 fig_2.savefig('plots/Heatmaps'  + '.png')
+
+
+
+
+
+fig_3, axs_3 = plt.subplots(1, 5, figsize=(8*5, 6))
+
+axs_3 = axs_3.flatten()
+
+for i, (data,name) in enumerate(list_no_plot):
+    
+    res = [ele for ele in data for i in range(num_cols)]
+    matrix = np.array(res).reshape(num_rows, num_cols)
+    
+    im = axs_3[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_no_plots, vmax=overall_max_no_plots)
+   
+    fig_2.colorbar(im, ax=axs_3[i])
+    axs_3[i].set_ylabel('c')
+    axs_3[i].set_title(f"Heatmap {name}")
+
+    axs_3[i].set_xticks([])
+
+    # Set the desired number of y-ticks
+    y_ticks = np.linspace(0, num_rows - 1, num=5)
+    
+    # Normalize the y-tick labels to be between 0 and 1
+    y_ticks_normalized = (y_ticks - y_ticks.min()) / (y_ticks.max() - y_ticks.min())
+    
+    # Set the ticks and the normalized labels
+    axs_3[i].set_yticks(y_ticks)
+    axs_3[i].set_yticklabels([f'{0.5 + yt/2:.2f}' for yt in y_ticks_normalized])
+
+fig_3.suptitle('Heatmaps for numerical optimum and the difference between numerical optimum and eq4, e12, eq13 and eq14, with H(rho) = 0.6 ', fontsize=16)
+
+fig_3.savefig('plots/HeatmapsNumericalOptimum'  + '.png')
 
 
 print("***************************************************")
