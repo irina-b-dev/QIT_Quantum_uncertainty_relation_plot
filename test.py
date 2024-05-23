@@ -198,8 +198,9 @@ overall_min_no_plots = min(all_values_no_plots)
 overall_max_no_plots = max(all_values_no_plots)
 
 # For the diff heatmaps
+data_no_plots414 = [(difflbno_4,"diff optimum - eq4"),(difflbno_14,"diff optimum - eq14")]
+all_values_no_plots414 = [value for array, _ in data_no_plots414 for value in array]
 
-all_values_no_plots414 = [difflbno_4, difflbno_14]
 
 overall_min_no_plots414 = min(all_values_no_plots414)
 overall_max_no_plots414 = max(all_values_no_plots414)
@@ -276,22 +277,22 @@ fig_3.savefig('plots/HeatmapsNumericalOptimum'  + '.png')
 
 
 
-fig_4, axs_4 = plt.subplots(1, 5, figsize=(8*5, 6))
+fig_4, axs_4 = plt.subplots(1, 2, figsize=(8*2, 6))
 
 axs_4 = axs_4.flatten()
 
-for i, (data,name) in enumerate(list_no_plot):
+for i, (data,name) in enumerate(data_no_plots414):
     
     res = [ele for ele in data for i in range(num_cols)]
     matrix = np.array(res).reshape(num_rows, num_cols)
     
-    im = axs_4[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_no_plots, vmax=overall_max_no_plots)
+    im = axs_4[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_no_plots414, vmax=overall_max_no_plots414)
    
     fig_4.colorbar(im, ax=axs_4[i])
     axs_4[i].set_ylabel('c')
     axs_4[i].set_title(f"Heatmap {name}")
 
-    axs_3[i].set_xticks([])
+    axs_4[i].set_xticks([])
 
     # Set the desired number of y-ticks
     y_ticks = np.linspace(0, num_rows - 1, num=5)
