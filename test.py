@@ -8,7 +8,7 @@ import numpy as np
 def p_entropy_func(p):
     if p == 0 or p == 1:
         return 0
-    return -p * math.log2(p) - (1-p) * math.log2(1-p)
+    return -p * np.log2(p) - (1-p) * np.log2(1-p)
 
 def p_search(H_ro):
     error = 0.001
@@ -52,7 +52,7 @@ def lower_bound_eq14(P, H_ro, c):
     binary_entropy = []
     for elem in c:
         value = (math.sqrt(2*P-1)*(2*math.sqrt(elem)-1)+1)/2
-        binary_entropy.append(-value*math.log2(value)-(1-value)*math.log2(1-value)-H_ro)
+        binary_entropy.append( -value*math.log2(value)-(1-value)*math.log2(1-value)-H_ro)
     return binary_entropy
 
 def lower_bound_eq4(H_ro, c):
@@ -77,7 +77,7 @@ def lower_bound_eq13(H_ro, c):
         value = (1 + math.sqrt(2 * elem - 1))/2
         bn_entr = -value*math.log2(value)-(1-value)*math.log2(1-value) - 2*H_ro
         if bn_entr > 0:
-            binary_entropy.append(bn_entr)
+            binary_entropy.append( bn_entr)
         else:
             binary_entropy.append(0)
     return binary_entropy
@@ -96,7 +96,7 @@ def numerical_optimum(c, p):
         fmin = 5
         alfa_list = [i/100 for i in range(int((gamma/2)*100), int(gamma*100)+1)]
         for alfa in alfa_list:
-            x1 = (math.cos(alfa) + 1)/2 
+            x1 = (math.cos(alfa) + 1)/2
             x2 = (math.cos(gamma - alfa)+1)/2
             entropy_1 = entropy_calculator(x1, p)
             entropy_2 = entropy_calculator(x2, p)
@@ -115,9 +115,9 @@ def l1_entropy(H_ro, P, c):
     return l1
 
 def mod(data):
-    if data >= 0:
-        return data
-    return -1*data
+    if data >= 0 :
+        return data 
+    return (-1*data)
 
 fig_1, axs_1 = plt.subplots(2, 2, figsize=(10, 8))  # 2 rows, 2 columns
 axs_1 = axs_1.flatten()
@@ -150,19 +150,37 @@ for H_ro in h_ro:
 
 fig_1.savefig('plots/H(rho)'  + '.png', bbox_inches='tight')
 
-H_ro = 0.6
-P, p = purity_calculator(H_ro)
+
+lb4 =[]
+lb12 = []
+lb13 = []
+lb14 = []
+no = []
+
 num_rows = 500
-num_cols = 350
-lb4 = lower_bound_eq4(H_ro, c)
-lb12 = lower_bound_eq12(H_ro, c)
-lb13 = lower_bound_eq13(H_ro, c)
-lb14 = lower_bound_eq14(P, H_ro, c)
-no = numerical_optimum(c, p)
-difflb4_12 = [mod(x - y) for x, y in zip(lb4, lb12)]
+num_cols = 500
+
+hros = [i/500 for i in range(0, num_cols)]
+i =0 
+
+for H_ro in hros:
+
+    P, p = purity_calculator(H_ro)
+
+    lb4 = lb4 + (lower_bound_eq4(H_ro, c))
+    lb12 = lb12 + (lower_bound_eq12(H_ro, c))
+    lb13 = lb13 + (lower_bound_eq13(H_ro, c))
+    lb14 = lb14 + (lower_bound_eq14(P, H_ro, c))
+    no = no + (numerical_optimum(c, p))
+    i = i + 1
+    print(f'\r Calculating purity {i//5} % \n', end=' ', flush=True) 
+
+print("Done")
+
+difflb4_12 =[ mod(x - y) for x, y in zip(lb4, lb12)]
 difflb4_13 = [mod(x - y) for x, y in zip(lb4, lb13)]
-difflb4_14 = [mod(x - y) for x, y in zip(lb4, lb14)]
-difflb12_13 = [mod(x - y) for x, y in zip(lb12, lb13)]
+difflb4_14 = ([mod(x - y) for x, y in zip(lb4, lb14)])
+difflb12_13 = ([mod(x - y) for x, y in zip(lb12, lb13)])
 difflb12_14 = [mod(x - y) for x, y in zip(lb12, lb14)]
 difflb13_14 = [mod(x - y) for x, y in zip(lb13, lb14)]
 
@@ -214,17 +232,22 @@ axs_2 = axs_2.flatten()
 
 for i, (data,name) in enumerate(list_vals_plot):
     
-    res = [ele for ele in data for i in range(num_cols)]
-    matrix = np.array(res).reshape(num_rows, num_cols)
+    #res = [ele for ele in data for i in range(num_cols)]
+    matrix = np.array(data).reshape(num_rows, num_cols)
     if i >= 5 :
         im = axs_2[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_last_six, vmax=overall_max_last_six)
     else:
         im = axs_2[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_first_four, vmax=overall_max_first_four)
     fig_2.colorbar(im, ax=axs_2[i])
+    axs_2[i].set_xlabel('H(rho)')
     axs_2[i].set_ylabel('c')
     axs_2[i].set_title(f"Heatmap {name}")
 
-    axs_2[i].set_xticks([])
+    x_ticks = np.linspace(0, num_cols , num=10)
+    x_ticks_normalized = (x_ticks - x_ticks.min()) / (x_ticks.max() - x_ticks.min())
+    
+    axs_2[i].set_xticks(x_ticks)
+    axs_2[i].set_xticklabels([f'{xt:.2f}' for xt in x_ticks_normalized])
 
     # Set the desired number of y-ticks
     y_ticks = np.linspace(0, num_rows - 1, num=5)
@@ -250,16 +273,21 @@ axs_3 = axs_3.flatten()
 
 for i, (data,name) in enumerate(list_no_plot):
     
-    res = [ele for ele in data for i in range(num_cols)]
-    matrix = np.array(res).reshape(num_rows, num_cols)
+    #res = [ele for ele in data for i in range(num_cols)]
+    matrix = np.array(data).reshape(num_rows, num_cols)
     
     im = axs_3[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_no_plots, vmax=overall_max_no_plots)
    
     fig_3.colorbar(im, ax=axs_3[i])
+    axs_3[i].set_xlabel('H(rho)')
     axs_3[i].set_ylabel('c')
     axs_3[i].set_title(f"Heatmap {name}")
 
-    axs_3[i].set_xticks([])
+    x_ticks = np.linspace(0, num_cols  , num=10)
+    x_ticks_normalized = (x_ticks - x_ticks.min()) / (x_ticks.max() - x_ticks.min())
+    
+    axs_3[i].set_xticks(x_ticks)
+    axs_3[i].set_xticklabels([f'{xt:.2f}' for xt in x_ticks_normalized])
 
     # Set the desired number of y-ticks
     y_ticks = np.linspace(0, num_rows - 1, num=5)
@@ -283,16 +311,24 @@ axs_4 = axs_4.flatten()
 
 for i, (data,name) in enumerate(data_no_plots414):
     
-    res = [ele for ele in data for i in range(num_cols)]
-    matrix = np.array(res).reshape(num_rows, num_cols)
+    #res = [ele for ele in data for i in range(num_cols)]
+    matrix = np.array(data).reshape(num_rows, num_cols)
     
     im = axs_4[i].imshow(matrix, cmap='gray', interpolation='nearest',  vmin=overall_min_no_plots414, vmax=overall_max_no_plots414)
    
     fig_4.colorbar(im, ax=axs_4[i])
+    axs_4[i].set_xlabel('H(rho)')
     axs_4[i].set_ylabel('c')
+
     axs_4[i].set_title(f"Heatmap {name}")
 
-    axs_4[i].set_xticks([])
+    x_ticks = np.linspace(0, num_cols , num=10)
+    x_ticks_normalized = (x_ticks - x_ticks.min()) / (x_ticks.max() - x_ticks.min())
+
+    axs_4[i].set_xticks(x_ticks)
+    axs_4[i].set_xticklabels([f'{xt:.2f}' for xt in x_ticks_normalized])
+
+    
 
     # Set the desired number of y-ticks
     y_ticks = np.linspace(0, num_rows - 1, num=5)
