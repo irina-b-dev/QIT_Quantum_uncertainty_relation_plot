@@ -259,7 +259,7 @@ for i, (data,name) in enumerate(list_vals_plot):
     axs_2[i].set_yticks(y_ticks)
     axs_2[i].set_yticklabels([f'{0.5 + yt/2:.2f}' for yt in y_ticks_normalized])
 
-fig_2.suptitle('Heatmaps for eq4, eq12, eq13, eq14 and the difference between eachother, with H(rho) = 0.6 ', fontsize=16)
+fig_2.suptitle('Heatmaps for eq4, eq12, eq13, eq14 and the difference between eachother ', fontsize=16)
 
 fig_2.savefig('plots/Heatmaps'  + '.png')
 
@@ -299,7 +299,7 @@ for i, (data,name) in enumerate(list_no_plot):
     axs_3[i].set_yticks(y_ticks)
     axs_3[i].set_yticklabels([f'{0.5 + yt/2:.2f}' for yt in y_ticks_normalized])
 
-fig_3.suptitle('Heatmaps for numerical optimum and the difference between numerical optimum and eq4, e12, eq13 and eq14, with H(rho) = 0.6 ', fontsize=16)
+fig_3.suptitle('Heatmaps for numerical optimum and the difference between numerical optimum and eq4, e12, eq13 and eq14 ', fontsize=16)
 
 fig_3.savefig('plots/HeatmapsNumericalOptimum'  + '.png')
 
@@ -340,7 +340,7 @@ for i, (data,name) in enumerate(data_no_plots414):
     axs_4[i].set_yticks(y_ticks)
     axs_4[i].set_yticklabels([f'{0.5 + yt/2:.2f}' for yt in y_ticks_normalized])
 
-fig_4.suptitle('Heatmaps for comparisons only between best 2 eq (eq4 and eq14) differences with the numerical optimum, with H(rho) = 0.6 ', fontsize=16)
+fig_4.suptitle('Heatmaps for comparisons only between best 2 eq (eq4 and eq14) differences with the numerical optimum ', fontsize=16)
 
 fig_4.savefig('plots/HeatmapOptimal-4VSHeatmapOptimal-14'  + '.png')
 
